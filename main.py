@@ -1,4 +1,5 @@
 import sys
+import scipy.misc
 from PyQt5.QtWidgets import (QApplication, QLineEdit, QPushButton,
                              QGridLayout, QWidget, QToolTip, QMessageBox)
 from PyQt5.QtGui import (QIcon, QFont)
@@ -37,6 +38,14 @@ class Window(QWidget):
         self.button6.setToolTip('Получится фото в оттенках синего. Введите натуральное число.')
         self.button7 = QPushButton('Обводка границ', self)
         self.button7.setToolTip('Введите натуральное число, чем меньше число, тем более неявные границы обводятся.')
+        self.button8 = QPushButton('Отразить относительно вертикали', self)
+        self.button8.setToolTip('Перевернёт изображение справа налево')
+        self.button9 = QPushButton('Отразить относительно горизонтали', self)
+        self.button9.setToolTip('Перевернёт изображение сверху вниз')
+        self.button10 = QPushButton('Наложение', self)
+        self.button10.setToolTip('Введите в первое поле ввода две ссылки на изображения через тройной пробел.'
+                                 ' В поле ввода чисел введите'
+                                 ' кол-во процентов занимаемое на картинке 1-ым изображением')
         self.textfield = QLineEdit(self)
         self.textfield.setFocus()
         self.textfield.setToolTip('Введите сюда только путь к фотографии.')
@@ -54,9 +63,12 @@ class Window(QWidget):
         self.grid.addWidget(self.button4, 4, 2)
         self.grid.addWidget(self.button5, 5, 1)
         self.grid.addWidget(self.textfield2, 1, 2)
-        self.grid.addWidget(self.textfield3, 6, 2)
+        self.grid.addWidget(self.textfield3, 9, 2)
         self.grid.addWidget(self.button6, 5, 2)
         self.grid.addWidget(self.button7, 6, 1)
+        self.grid.addWidget(self.button8, 6, 2)
+        self.grid.addWidget(self.button9, 7, 1)
+        self.grid.addWidget(self.button10, 7, 2)
         self.setLayout(self.grid)
         self.button1.clicked.connect(self.black_white)
         self.button2.clicked.connect(self.negative)
@@ -64,7 +76,10 @@ class Window(QWidget):
         self.button4.clicked.connect(self.adding_noises)
         self.button5.clicked.connect(self.sepia)
         self.button6.clicked.connect(self.blue_colors)
-        self.button7.clicked.connect(self.ui)
+        self.button7.clicked.connect(self.border)
+        self.button8.clicked.connect(self.flip_vertical)
+        self.button9.clicked.connect(self.flip_horizontal)
+        self.button10.clicked.connect(self.overlay)
         self.setGeometry(300, 300, 300, 200)
         self.setWindowTitle('Program for changing colors of photos')
         self.show()
@@ -149,7 +164,7 @@ class Window(QWidget):
         except:
             self.textfield3.setText('Что-то пошло не так. Перепроверьте правильность введёных данных.')
 
-    def ui(self):
+    def border(self):
         try:
             inp = self.textfield.text()
             out = self.textfield2.text()
@@ -174,6 +189,39 @@ class Window(QWidget):
                         arr.add((i, j))
             for i, j in arr:
                 img[i, j] = [0, 0, 0]
+            io.imsave(r'' + out, img.astype(np.uint(8)))
+        except:
+            self.textfield3.setText('Что-то пошло не так. Перепроверьте правильность введёных данных.')
+
+    def flip_vertical(self):
+        try:
+            inp = self.textfield.text()
+            out = self.textfield2.text()
+            img = io.imread(r'' + inp).astype(np.int)
+            img = img[:, ::-1]
+            io.imsave(r'' + out, img.astype(np.uint(8)))
+        except:
+            self.textfield3.setText('Что-то пошло не так. Перепроверьте правильность введёных данных.')
+
+    def flip_horizontal(self):
+        try:
+            inp = self.textfield.text()
+            out = self.textfield2.text()
+            img = io.imread(r'' + inp).astype(np.int)
+            img = img[::-1]
+            io.imsave(r'' + out, img.astype(np.uint(8)))
+        except:
+            self.textfield3.setText('Что-то пошло не так. Перепроверьте правильность введёных данных.')
+
+    def overlay(self):
+        try:
+            inp1, inp2 = self.textfield.text().split('   ')
+            out = self.textfield2.text()
+            proc = int(self.textfield3.text())
+            img1 = io.imread(r'' + inp1).astype(np.int)
+            img2 = io.imread(r'' + inp2).astype(np.int)
+            img1 = scipy.misc.imresize(img1, (img2.shape[0], img2.shape[1]))
+            img = (img1 * (proc / 100) + img2 * ((100 - proc) / 100)) // 1
             io.imsave(r'' + out, img.astype(np.uint(8)))
         except:
             self.textfield3.setText('Что-то пошло не так. Перепроверьте правильность введёных данных.')
