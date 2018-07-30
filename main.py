@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (QApplication, QLineEdit, QPushButton,
 from PyQt5.QtGui import (QIcon, QFont)
 from skimage import io
 import numpy as np
+
 np.set_printoptions(precision=4, threshold=np.nan, linewidth=np.nan, suppress=True)
 
 
@@ -15,6 +16,12 @@ def black_white_2(img):
     img1[:, :, 1] = img
     img1[:, :, 2] = img
     return img1
+
+
+def check_path(path):
+    if path[0] == '"':
+        path = path[1:-1]
+    return path
 
 
 class Window(QWidget):
@@ -86,8 +93,8 @@ class Window(QWidget):
 
     def black_white(self):
         try:
-            inp = self.textfield.text()
-            out = self.textfield2.text()
+            inp = check_path(self.textfield.text())
+            out = check_path(self.textfield2.text())
             img = io.imread(r'' + inp).astype(np.int)
             img1 = np.zeros((img.shape[0], img.shape[1], 3))
             img = (img[:, :, 0] + img[:, :, 1] + img[:, :, 2]) // 3
@@ -100,8 +107,8 @@ class Window(QWidget):
 
     def negative(self):
         try:
-            inp = self.textfield.text()
-            out = self.textfield2.text()
+            inp = check_path(self.textfield.text())
+            out = check_path(self.textfield2.text())
             img = io.imread(r'' + inp).astype(np.int)
             img1 = np.abs(img - 255)
             io.imsave(r'' + out, img1.astype(np.uint(8)))
@@ -110,8 +117,8 @@ class Window(QWidget):
 
     def lighter_darker(self):
         try:
-            inp = self.textfield.text()
-            out = self.textfield2.text()
+            inp = check_path(self.textfield.text())
+            out = check_path(self.textfield2.text())
             factor = int(self.textfield3.text())
             img = io.imread(r'' + inp).astype(np.int)
             img += factor
@@ -123,8 +130,8 @@ class Window(QWidget):
 
     def adding_noises(self):
         try:
-            inp = self.textfield.text()
-            out = self.textfield2.text()
+            inp = check_path(self.textfield.text())
+            out = check_path(self.textfield2.text())
             factor = int(self.textfield3.text())
             img = io.imread(r'' + inp).astype(np.int)
             img += np.random.randint(-factor - 1, factor + 1, (img.shape[0], img.shape[1], 3))
@@ -136,8 +143,8 @@ class Window(QWidget):
 
     def sepia(self):
         try:
-            inp = self.textfield.text()
-            out = self.textfield2.text()
+            inp = check_path(self.textfield.text())
+            out = check_path(self.textfield2.text())
             depth = int(self.textfield3.text())
             img = io.imread(r'' + inp).astype(np.int)
             img = black_white_2(img)
@@ -151,8 +158,8 @@ class Window(QWidget):
 
     def blue_colors(self):
         try:
-            inp = self.textfield.text()
-            out = self.textfield2.text()
+            inp = check_path(self.textfield.text())
+            out = check_path(self.textfield2.text())
             depth = -int(self.textfield3.text())
             img = io.imread(r'' + inp).astype(np.int)
             img = black_white_2(img)
@@ -166,8 +173,8 @@ class Window(QWidget):
 
     def border(self):
         try:
-            inp = self.textfield.text()
-            out = self.textfield2.text()
+            inp = check_path(self.textfield.text())
+            out = check_path(self.textfield2.text())
             depth = int(self.textfield3.text())
             img = io.imread(r'' + inp).astype(np.int)
             arr = set()
@@ -195,8 +202,8 @@ class Window(QWidget):
 
     def flip_vertical(self):
         try:
-            inp = self.textfield.text()
-            out = self.textfield2.text()
+            inp = check_path(self.textfield.text())
+            out = check_path(self.textfield2.text())
             img = io.imread(r'' + inp).astype(np.int)
             img = img[:, ::-1]
             io.imsave(r'' + out, img.astype(np.uint(8)))
@@ -205,8 +212,8 @@ class Window(QWidget):
 
     def flip_horizontal(self):
         try:
-            inp = self.textfield.text()
-            out = self.textfield2.text()
+            inp = check_path(self.textfield.text())
+            out = check_path(self.textfield2.text())
             img = io.imread(r'' + inp).astype(np.int)
             img = img[::-1]
             io.imsave(r'' + out, img.astype(np.uint(8)))
@@ -216,7 +223,9 @@ class Window(QWidget):
     def overlay(self):
         try:
             inp1, inp2 = self.textfield.text().split('   ')
-            out = self.textfield2.text()
+            inp1 = check_path(inp1)
+            inp2 = check_path(inp2)
+            out = check_path(self.textfield2.text())
             proc = int(self.textfield3.text())
             img1 = io.imread(r'' + inp1).astype(np.int)
             img2 = io.imread(r'' + inp2).astype(np.int)
